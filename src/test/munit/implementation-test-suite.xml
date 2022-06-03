@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implementation-test-suite.xml" />
+	<munit:test name="implementation-test-suite-getInsuranceFlowTest" doc:id="bc9d03d8-87d8-4f51-95f6-90ca0bb5eff4" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="75c01e52-33b4-418d-bd54-550faaf6905a" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="insuranceRequest" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="83161a56-63ca-4c4d-97e4-0e3c5223ce21" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APP:GET_INSURANCE_REQUEST_CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="73f19d27-4114-47a2-a6f9-e41128241315">
+				<munit:attributes value="#[readUrl('classpath://getInsuranceFlowtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to getInsuranceFlow" doc:id="7e05eded-ede7-45cd-9472-2862be837540" name="getInsuranceFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="57f36d55-1b69-4c9b-88b6-e35b605de245" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="e52e4610-95fb-4154-98cc-b71529b4ca33" actual="#[vars.httpStatus]" expected="400"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-addInsuranceFlowTest" doc:id="ae3688d3-b1d9-46d6-a5ca-87fb331d545d" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="9bd65c93-b126-4104-9263-6caf59ee32fe" processor="salesforce:create">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Create" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="e9acb83b-0e45-4233-92fd-696494038bf3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APP:CREATE_ACTION_FAILED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="74debe88-9d0a-4293-a04c-16760a2d9e0a" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://addInsuranceFlowtest\set-event_payload.dwl')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to addInsuranceFlow" doc:id="c7790993-b66b-46e2-8dad-df9bec443ef1" name="addInsuranceFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="fc0475ff-a9d5-4354-a1ab-3e4c2989a2a2" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="89333438-f9d9-4008-9261-ba35ec43c438" actual="#[vars.httpStatus]" expected="400"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-addInsuranceFlowTest1" doc:id="8703d778-b361-48db-b253-4b768c3e9b7f" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="54282bad-c8e3-4a3a-8335-8681778687e9" processor="salesforce:create">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Create" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="e9acb83b-0e45-4233-92fd-696494038bf3" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="f55625ce-2d5c-49c6-bfa1-02a57559ce65" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c9a7d5c0-b77f-4427-b53c-1380a42bcf29" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Salesforce_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APP:QUERY_ACTION_FAILED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="ccddcbc0-9f45-47e7-ad2b-4c33d5ec6981" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://addInsuranceFlowtest\set-event_payload.dwl')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to addInsuranceFlow" doc:id="bd6a6a3c-ff43-4395-92bc-6c4ae6ef7c59" name="addInsuranceFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="90c58862-d1e6-44d8-945a-4b8f22f0242a" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="d93227b6-bd3f-4513-bbd7-724a34384ba6" actual="#[vars.httpStatus]" expected="400"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-claimInsuranceFlowTest" doc:id="f5125dce-e1b3-46c7-9766-6fdc88c8e715" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="85eafe22-300c-461c-af24-4da243b53258" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="eec2ee79-2ab8-488e-80ff-35511dab7465" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APP_SALESFORCE:UPDATE_FAILED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="b1fcd089-7161-4995-8da5-b84d7b0649a2" >
+				<munit:payload value="#[readUrl('classpath://claimInsuranceFlowtest\set-event_payload.dwl')]" />
+				<munit:attributes value="#[readUrl('classpath://claimInsuranceFlowtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to claimInsuranceFlow" doc:id="3dfbc0ce-daf2-42c9-b05b-a5ef8f84c55f" name="claimInsuranceFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="45c2659c-3904-4585-9077-7006e69d26ce" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="bd7f423f-7140-4a4b-97f6-4504bb6177de" actual="#[vars.httpStatus]" expected="400"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-claimInsuranceFlowTest1" doc:id="e858ee50-63e9-46d8-9a56-603b22b188ee" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="7d3f5f3b-58e1-49b8-b819-e8122d5ef6a8" processor="salesforce:query">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="eec2ee79-2ab8-488e-80ff-35511dab7465" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APP:VALIDATION_POLICY_DETAILS" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="d042cedc-000d-4603-9a3d-f4d19751bc6b" >
+				<munit:payload value="#[readUrl('classpath://claimInsuranceFlowtest\set-event_payload.dwl')]" />
+				<munit:attributes value="#[readUrl('classpath://claimInsuranceFlowtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to claimInsuranceFlow" doc:id="e3043086-9e5e-41b3-8cd6-40997b8f1268" name="claimInsuranceFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a5938209-6691-49a4-a396-0610666d59e2" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="e03fa0a7-e09d-49df-b345-5d1a82900e49" actual="#[vars.httpStatus]" expected="400"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-healthApprovalFlowTest" doc:id="0c017896-c1e0-4b37-a772-998d5c03bb9b" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="71b5f9bb-023c-4fe3-983c-867f7aed4e1f" processor="salesforce:upsert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="af32dc6d-fc57-4bbe-ae9b-024a029d05a0" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="Salesforce_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APP_SALESFORCE:UPDATE_FAILED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="7d569fe0-efc5-4470-8cd8-99696ed2f596" >
+				<munit:payload value='[&#10;  {&#10;    "Id": "a025j00000AORIHAA5",&#10;    "Type__c": "Health",&#10;    "CustomerID__c": "17046",&#10;    "PolicyID__c": "POL-00030"&#10;  }&#10;]' encoding="UTF-8" mediaType="text/plain" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to healthApprovalFlow" doc:id="7f8f7016-449f-40fa-ae49-b24e78bc4d0a" name="healthApprovalFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="c50f9772-3498-4708-aeac-198de116913f" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="773babc6-6c16-45e8-ad00-394b67ab6679" actual="#[vars.httpStatus]" expected="400"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-test-suite-getInsuranceFlowTest1" doc:id="9eae03cd-b091-4828-b0f1-336864d25d10" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="40440a07-85a9-405e-9c1b-a052a059afcd" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="insuranceRequest" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="83161a56-63ca-4c4d-97e4-0e3c5223ce21" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="5fc4f495-ed08-4169-9264-1dbf7498601e" >
+				<munit:attributes value="#[readUrl('classpath://getInsuranceFlowtest\set-event_attributes.dwl')]" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to getInsuranceFlow" doc:id="603963cc-46b9-4c8b-9d95-643ec19cd7da" name="getInsuranceFlow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="dfa6cd78-fa16-4e1c-b71d-3fa8b75f3d01" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
