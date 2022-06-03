@@ -1,0 +1,63 @@
+request:
+  host: "thirdparty-insuranceproviders.us-e2.cloudhub.io"
+  port: "80"
+  protocol: "HTTP"
+  basepath: "/"
+  client_id: "5d6552c38a854acba13f4155afaef89a"
+  client_secret: "5825E991e0904C2CBB4097aE0D802f7E"
+  contentType: "application/json"
+  accept: "application/json"
+
+https:
+  host: "0.0.0.0"
+  port: "8087"
+  protocol: "HTTPS"
+  basepath: "/"
+  
+keystore:
+  client:
+    path: "clientkeystore.jks"
+    type: "JKS"
+    alias: "myclient"
+    keypassword: "password"
+    password: "password"
+  
+  server:
+    path: "serverkeystore.jks"
+    type: "JKS"
+    alias: "myserver"
+    keypassword: "password"
+    password: "password"
+    
+
+
+truststore:
+  client:
+    path: "clienttruststore.jks"
+    type: "JKS"
+    keypassword: "password"
+  server:
+    path: "servertruststore.jks"
+    type: "JKS"
+    keypassword: "password"
+    
+
+json:
+  logger:
+    application:
+      name: "Insurance Application"
+      version: "1.0.0"
+      env: "qa"
+
+sfdc:
+  username: "ravikumar.j.jayaraj@apisero.com"
+  password: "Jarvis1@"
+  token:  "CsifJkkEnMYNoglZteti0SEI7"
+  
+  
+sqs:
+  accessKey: "AKIA53A6BH2GS5TG6DMA"
+  secretKey: "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"
+  arn: "arn:aws:sqs:us-east-2:951398252173:health_approval_request"
+  url: "https://sqs.us-east-2.amazonaws.com/951398252173/health_approval_request"
+  region: "US East (Ohio)"

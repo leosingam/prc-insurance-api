@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls" xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
+	<http:request-config name="Request_config" doc:name="HTTP Request configuration" doc:id="380a7a6b-cc74-452b-94e8-51c144a9c9b0" basePath="${request.basepath}" >
+		<http:request-connection host="${request.host}" port="${request.port}" protocol="${request.protocol}"/>
+	</http:request-config>
+	<http:listener-config name="Listener_config" doc:name="HTTP Listener config" doc:id="0506cbeb-699c-4b2f-9110-7d318f2e2e08" basePath="${https.basepath}" >
+		<http:listener-connection host="${https.host}" port="${https.port}" protocol="HTTPS">
+			<tls:context >
+				<tls:key-store type="${keystore.server.type}" path="${keystore.server.path}" alias="${keystore.server.alias}" keyPassword="${keystore.server.keypassword}" password="${keystore.server.password}" />
+			</tls:context>
+		</http:listener-connection>
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="6bc57e2d-80e1-4e51-b9a3-679b0095b6fa" file="config.yaml" />
+	<json-logger:config name="JSON_Log_Config" doc:name="JSON Logger Config" doc:id="d98308ec-1df9-4e87-97d8-f019b9e13f8a" environment="${json.logger.application.env}" />
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="6482bf6a-b1b9-4c62-8ccc-be015244249b" >
+		<salesforce:basic-connection username="${sfdc.username}" password="${sfdc.password}" securityToken="${sfdc.token}" />
+	</salesforce:sfdc-config>
+	<sqs:config name="Amazon_SQS_Configuration" doc:name="Amazon SQS Configuration" doc:id="b3037b72-32ef-4a3e-ae19-0717e3744993" defaultQueueUrl="${sqs.url}" >
+		<sqs:basic-connection testQueueArn="${sqs.arn}" accessKey="${sqs.accessKey}" secretKey="${sqs.secretKey}" region="us-east-2"/>
+	</sqs:config>
+</mule>

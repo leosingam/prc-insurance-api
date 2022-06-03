@@ -1,0 +1,17 @@
+[
+  {
+    "insurer": "Bharathi AXA",
+    "period": 1,
+    "benfitted_amount": 2991,
+    "total_premium": 885,
+	"insuranancecompany": "Life Insurance Corporation",
+    "termperiod": 1,
+    "benefitamount": 1094,
+    "premiumamount": 470,
+	"company": "TATA AIG",
+    "term": 1,
+    "benfit": 5981,
+    "sumAssured": 1094,
+    "AssuredSum": 27453
+  }
+]

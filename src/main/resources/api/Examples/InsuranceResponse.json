@@ -1,0 +1,22 @@
+{
+    "Term_Years": 24,
+    "CustomerID": "8.97374729E9",
+    "SumAssured": 416827.0,
+    "Mobile": "8973747290",
+    "AgentID": "Bala123",
+    "InsurerID": "STAR",
+    "Type": "Insurance",
+    "CustomerName": "Ravikumar Jayaraj",
+    "Address": "XXXX",
+    "Name": "CORONA SAVERS 2019",
+    "Agency": "XXX",
+    "InsurerName": "STAR HEALTH INSURANCE",
+    "AgentName": "Bala",
+    "Premium": 11000,
+    "PolicyDate": "2022-05-29",
+    "MonthlyPremium_First_2_yrs": 10250.00,
+    "MonthlyPremium_From_3rd_yrs": 0.0,
+    "Email": "ravi@abc.com",
+    "Status": "",
+    "Claimed":""
+  }

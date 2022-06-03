@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd">
+	<flow name="getInsuranceFlow" doc:id="17c6d27a-4577-4b21-a1bb-ccf096ff2dd7" >
+		<ee:transform doc:name="vars_insurerID &amp; TypeofInsurance" doc:id="2b28a23c-0b96-44fa-9084-8d7e4ba5be18" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="typeOfInsurance" ><![CDATA[attributes.queryParams.insuranceType default '' as String]]></ee:set-variable>
+				<ee:set-variable variableName="insurerID" ><![CDATA[attributes.queryParams.ins default '' as String]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="insuranceRequest" doc:id="83161a56-63ca-4c4d-97e4-0e3c5223ce21" config-ref="Request_config" path="/quote/{insType}">
+			<error-mapping sourceType="HTTP:CONNECTIVITY" targetType="APP:GET_INSURANCE_REQUEST_CONNECTIVITY" />
+			<error-mapping sourceType="HTTP:NOT_FOUND" targetType="APP:GET_INSURANCE_REQUEST_CONNECTIVITY" />
+			<error-mapping sourceType="HTTP:INTERNAL_SERVER_ERROR" targetType="APP:GET_INSURANCE_REQUEST_CONNECTIVITY" />
+			<http:uri-params ><![CDATA[#[output application/json
+---
+{
+	"insType" : attributes.queryParams.ins
+}]]]></http:uri-params>
+			<http:query-params ><![CDATA[#[output application/json
+---
+{
+	"income" : attributes.queryParams.income,
+	"age" : attributes.queryParams.age,
+	"insuranceType" : attributes.queryParams.insuranceType,
+	"smoking" : attributes.queryParams.smoking,
+	"drinking" : attributes.queryParams.drinking,
+	"disease" : attributes.queryParams.disease
+}]]]></http:query-params>
+		</http:request>
+		<choice doc:name="Choice" doc:id="acf2f509-ecb6-45a9-a9d3-c2419a8569a3" >
+			<when expression="#[payload == null]">
+				<ee:transform doc:name="NoInsurance" doc:id="c4d9fa60-843e-4a75-b9af-d5e7bd9a9de3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "No plans available for the provided for your search criteria. Please change the values and try again"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="InsuranceTransfomer" doc:id="98c0cbea-5f73-4100-be25-52a3b1235ddf">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+import first from dw::core::Strings
+
+import * from dw::Runtime
+var lowercase_char="abcdefghijklmnopqrstuvwxyz"
+var uppercase_char="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+var combined_list =  uppercase_char ++ lowercase_char
+var lowercase_char_length = sizeOf(lowercase_char)
+var uppercase_char_length = sizeOf(uppercase_char)
+var combined_list_length = sizeOf(combined_list)
+fun generate_char(maxLength:Number) = 
+  if ( maxLength <= 4 ) fail("Password length must be greater than 4")
+  else (do {
+	var random_upper = uppercase_char[uppercase_char_length * random()]
+	var random_lower = lowercase_char[lowercase_char_length * random()]
+	var temp_pass = [random_upper ++ random_lower]
+	---
+	(((0 to maxLength - 5) as Array default [] reduce ((item, acc = []) -> acc + combined_list[combined_list_length * random()]) ++ temp_pass) orderBy random()) joinBy ""
+})
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Term_Years: payload01.period default 0 + payload01.termperiod default 0 + payload01.term default 0,
+	CustomerID: round(random()*100000) as String,
+	SumAssured: payload01.AssuredSum default 0 + payload01.sumAssured default 0 + payload01.benefitamount default 0 + payload01.benfitted_amount default 0 + payload01.benfit default 0,
+	Mobile: round(random()*100000) as String ++ round(random()*100000) as String,
+	AgentID: round(random()*100000) as String,
+	InsurerID: vars.insurerID,
+	Type: vars.typeOfInsurance default "",
+	CustomerName: generate_char(10),
+	Address: "XXXXX",
+	Name: "Corona Policy - " ++ if (payload01.insurer != null)
+			   payload01.insurer
+			else if (payload01.insuranancecompany != null)
+			   payload01.insuranancecompany
+			else
+			   payload01.company,
+	Agency: "XXX",
+	InsurerName: if (payload01.insurer != null)
+			   payload01.insurer
+			else if (payload01.insuranancecompany != null)
+			   payload01.insuranancecompany
+			else
+			   payload01.company,
+	AgentName: generate_char(10),
+	Premium: payload01.total_premium default 0 + payload01.premiumamount default 0 + payload01.premium default 0,
+	PolicyDate: now() as String {
+		format: "y-MM-dd"
+	},
+	MonthlyPremium_First_2_yrs: payload01.total_premium default 0 + payload01.premiumamount default 0 + payload01.premium default 0,
+	MonthlyPremium_From_3rd_yrs: payload01.total_premium default 0 + payload01.premiumamount default 0 + payload01.premium default 0,
+	Email: generate_char(10) ++ round(random()*100) as String ++ "@gmail.com" as String,
+	Status: "Active",
+	Claimed: "No"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<json-logger:logger doc:id="aa35e959-6084-4acb-8581-68a085c391ab" message='#["End of Get Insurance Flow"]' config-ref="JSON_Log_Config" doc:name="getInsuranceLogger"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f07297bf-5bca-469d-9ea8-e11509b95334" type="APP:GET_INSURANCE_REQUEST_CONNECTIVITY">
+				<ee:transform doc:name="Transform Message" doc:id="af9dd472-f844-4d4b-8be8-39852785ef8d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "Getting error while connecting to the Third Party insurances"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="httpStatus" doc:id="e1948ddb-57f2-4101-b208-8aaeea846cd7" variableName="httpStatus"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="addInsuranceFlow" doc:id="16a9c77a-c0d8-4be3-86aa-a97da7efd17a" >
+		<flow-ref doc:name="taxCalculationFlowReference" doc:id="1f73aadb-35c7-4f80-abf7-d11d03bb06bd" name="taxCalculationFlow"/>
+		<ee:transform doc:name="JSON to Salesforce" doc:id="d76cdbec-8263-451a-aa14-80e0d5c80280" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	Name: payload.Name,
+	InsurerName__c: payload.InsurerName,
+	InsurerID__c: payload.InsurerID,
+	Type__c: payload.Type,
+	Premium__c: payload.Premium,
+	Term_Years__c: payload.Term_Years,
+	SumAssured__c: payload.SumAssured,
+	CustomerName__c: payload.CustomerName,
+	CustomerID__c: payload.CustomerID,
+	Mobile__c: payload.Mobile,
+	Email__c: payload.Email,
+	Address__c: payload.Address,
+	AgentName__c: payload.AgentName,
+	AgentID__c: payload.AgentID,
+	Agency__c: payload.Agency,
+	PolicyDate__c: (payload.PolicyDate default ""),
+	MonthlyPremium_First_2_yrs__c: vars.premium_2_years,
+	MonthlyPremium_From_3rd_yrs__c: vars.premium_3rd_year,
+	Status__c: payload.Status,
+	Claimed__c: payload.Claimed
+}]]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="custID" ><![CDATA[payload.CustomerID]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:create type="Insurance__c" doc:name="Create" doc:id="e9acb83b-0e45-4233-92fd-696494038bf3" config-ref="Salesforce_Config">
+			<error-mapping targetType="APP:CREATE_ACTION_FAILED" />
+		</salesforce:create>
+		<salesforce:query doc:name="Query" doc:id="c9a7d5c0-b77f-4427-b53c-1380a42bcf29" config-ref="Salesforce_Config">
+			<error-mapping targetType="APP:QUERY_ACTION_FAILED" />
+			<salesforce:salesforce-query ><![CDATA[Select PolicyID__c from Insurance__c WHERE CustomerID__c =':custID' order by PolicyID__c desc]]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	"custID" : vars.custID
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<set-variable value='#[payload[0].PolicyID__c default ""]' doc:name="Set Variable" doc:id="95009175-7d85-44c4-a7c9-ef2d1cee5c75" variableName="policyID"/>
+		<ee:transform doc:name="policyAdded" doc:id="b8b30243-1849-4dd5-84b2-5bbaff957fef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Your policy has been added to the Salesforce Database. Your Policy ID is ::: " 
+	++ vars.policyID
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<json-logger:logger doc:name="addInsuranceLogger" doc:id="dee3de1a-cbb1-45b6-847a-3a233c7ded35" config-ref="JSON_Log_Config" message="Insurance Added into Salesforce Database Successfully"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="382b9833-6f91-432b-99c3-226163e0c40c" type="APP:CREATE_ACTION_FAILED">
+				<ee:transform doc:name="Transform Message" doc:id="1c0cba49-4044-41b8-b78a-8307afca6db6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "Failed to add the policy into the Salesforce database. Please try again after sometime"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="httpStatus" doc:id="035d0de8-9d3b-4388-9e40-714be9c305c2" variableName="httpStatus"/>
+				<json-logger:logger doc:name="addInsuranceLogger" doc:id="64f07003-f099-484e-9d03-1df1c325cd8d" config-ref="JSON_Log_Config" message='#["Failed During creation of entries in the Salesforce DB"]'/>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f09bec70-da08-4d82-a05e-c642a75b9632" type="APP:QUERY_ACTION_FAILED">
+				<ee:transform doc:name="Transform Message" doc:id="8641d8ae-757f-4cb0-b630-8159fd173658" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : "Policy has been added to the database. Please contact the support team for Policy details"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="httpStatus" doc:id="7b3098ae-ee80-403e-b05c-c6806b672613" variableName="httpStatus"/>
+				<json-logger:logger doc:name="addInsuranceLogger" doc:id="3c2dd9cc-8d1a-4eee-ada3-aa149a6fe697" config-ref="JSON_Log_Config" message='#["Failed During retrieving of entries in the Salesforce DB"]'/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<sub-flow name="taxCalculationFlow" doc:id="cc009837-43d2-488b-a9da-404b9978ae66" >
+		<choice doc:name="Choice" doc:id="724633f9-5edb-4272-a728-69c4f65d4774" >
+			<when expression='#[payload.Term_Years &gt;5 and payload.Type =="Term"]'>
+				<ee:transform doc:name="payload_Varaiables" doc:id="ecff3847-91ac-40ae-a434-2b469a4c8e51" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="premium_2_years" ><![CDATA[payload.Premium + (payload.Premium*4.5/100)]]></ee:set-variable>
+						<ee:set-variable variableName="premium_3rd_year" ><![CDATA[payload.Premium + (payload.Premium*2.5/100)]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<json-logger:logger doc:name="taxCalculationLogger" doc:id="0d716892-e690-4bd4-93db-67c8794df91a" config-ref="JSON_Log_Config" message='#["Term Insurance Flow with tenure greater than 5 years tax Calculation"]'/>
+			</when>
+			<when expression='#[payload.Term_Years &lt;=5 and payload.Type =="Term"]' >
+				<ee:transform doc:name="payload_Varaiables" doc:id="7997e157-32aa-46e1-90e3-f2bd969ff457">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="premium_2_years"><![CDATA[payload.Premium + (payload.Premium*4.5/100)]]></ee:set-variable>
+						<ee:set-variable variableName="premium_3rd_year"><![CDATA[payload.Premium + (payload.Premium*4.5/100)]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<json-logger:logger doc:name="taxCalculationLogger" doc:id="828261c4-ab46-450e-b5fc-c95bbfbd9626" config-ref="JSON_Log_Config" message='#["Term Insurance Flow with tenure upto 5 years tax calculation"]'/>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="payload_Varaiables" doc:id="28e14791-1a94-4994-9cca-70c02ec541b1">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="premium_2_years" ><![CDATA[payload.Premium]]></ee:set-variable>
+						<ee:set-variable variableName="premium_3rd_year" ><![CDATA[payload.Premium]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<json-logger:logger doc:name="taxCalculationLogger" doc:id="e2b5515f-93f1-402e-b7d6-ec87404bea1f" config-ref="JSON_Log_Config" message='#["Health Insurance Tax Calculation"]'/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	<flow name="claimInsuranceFlow" doc:id="1ee7be23-7273-49a4-9859-a32a5bdd5648" >
+		<ee:transform doc:name="Transform Message" doc:id="68106999-e2a4-468e-8388-6751ca7d7cf7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message" : ""
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="policyID" ><![CDATA[message.attributes.queryParams.policyid]]></ee:set-variable>
+				<ee:set-variable variableName="customerID" ><![CDATA[message.attributes.queryParams.customerid]]></ee:set-variable>
+				<ee:set-variable variableName="insurance" ><![CDATA[message.attributes.queryParams.insurance]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="Query" doc:id="eec2ee79-2ab8-488e-80ff-35511dab7465" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[Select PolicyID__c, CustomerID__c, Type__c, Claimed__c, Id from Insurance__c WHERE PolicyID__c = ':policyID']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[output application/json
+---
+{
+	"policyID" : attributes.queryParams.policyid
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<validation:is-true doc:name="Is true" doc:id="f25eecfa-4a28-4f59-a61d-db3830adc7ab" expression="#[payload[0].CustomerID__c == vars.customerID and payload[0].Type__c == vars.insurance]" message='#["The policy details does not match. Please check the details provided"]' >
+			<error-mapping sourceType="VALIDATION:INVALID_BOOLEAN" targetType="APP:VALIDATION_POLICY_DETAILS" />
+		</validation:is-true>
+		<choice doc:name="Choice" doc:id="972ab1ca-ae87-47c5-8c76-e0414f775848" >
+			<when expression='#[payload[0].Type__c == "Health"]'>
+				<json-logger:logger doc:name="ClaimInsuranceLogger" doc:id="0ee165fa-2f26-4aee-89ad-d694cfbc6a2e" config-ref="JSON_Log_Config" message='#["Claiming Health Insurance Flow"]' tracePoint="BEFORE_TRANSFORM"/>
+				<ee:transform doc:name="Object to Array JSON" doc:id="eed3acfa-bca2-48be-a4de-95f84a65e3c9">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"Id" : payload[0].Id,
+	"Type__c" : payload[0].Type__c,
+	"CustomerID__c" : payload[0].CustomerID__c,
+	"PolicyID__c" : payload[0].PolicyID__c
+}]]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<ee:transform doc:name="JSON to JMS" doc:id="42394429-e6d1-4385-8de0-001213deb4b1">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	delaySeconds: 0,
+	body: write(payload,"application/json"),
+	messageAttributes: {
+		"AccountId": {
+			"stringValue" : "000123456",
+			"dataType" : "String.AccountId"
+		} as Object {
+			class: "org.mule.extension.sqs.api.model.MessageAttributeValue"
+		},
+		"NumberId": {
+			"stringValue" : "230.000000000000000001",
+			"dataType" : "Number"
+		} as Object {
+			class : "org.mule.extension.sqs.api.model.MessageAttributeValue"
+		}
+	} as Object {
+		class: "java.util.HashMap"
+	}
+} as Object {
+	class: "org.mule.extension.sqs.api.model.Message"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<sqs:send-message doc:name="Send message" doc:id="421b073e-2135-4e9f-b74d-9d80514a082a" config-ref="Amazon_SQS_Configuration"/>
+				<set-payload value="#[%dw 2.0
+output application/json
+---
+{&quot;message&quot; : &quot;Your Policy &quot; ++ vars.policyID as String default '' ++ &quot; requires approval. Your claim is in process &quot;}]" doc:name="approval_in_Progress" doc:id="653aafc7-b6db-4d6f-94f7-937e3a6ee849" />
+			</when>
+			<otherwise >
+				<json-logger:logger doc:name="ClaimInsuranceLogger" doc:id="eec6141a-b898-466b-944b-f2b17e41156d" config-ref="JSON_Log_Config" message='#["Claiming Term Insurance Flow"]'/>
+				<ee:transform doc:name="Object to Array JSON" doc:id="ba2dd794-8686-4d62-a917-9abfe9e336df">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"Id" : payload[0].Id,
+	"Type__c" : payload[0].Type__c,
+	"Claimed__c" : "Yes",
+	"CustomerID__c" : payload[0].CustomerID__c
+}]]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+						<ee:set-variable variableName="policyID" ><![CDATA[payload[0].PolicyID__c default '']]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<salesforce:upsert doc:name="Upsert" doc:id="b5afd2e3-39e4-40f1-95c1-54572123e89a" config-ref="Salesforce_Config" objectType="Insurance__c" externalIdFieldName="Id">
+					<error-mapping targetType="APP_SALESFORCE:UPDATE_FAILED" />
+				</salesforce:upsert>
+				<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;&quot;message&quot; : &quot;Your Claim has been approved for the Term Insurance = &quot; ++ vars.policyID default ''&#10;}]" doc:name="Term_Claimed" doc:id="df566b45-fb5c-49d9-8e1a-ecfb449d0fd2" />
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="786e9bf8-9fb9-460e-81a8-40deb519f164" type="APP:VALIDATION_POLICY_DETAILS">
+				<ee:transform doc:name="Transform Message" doc:id="bdbf2034-5ef0-47a4-a893-4a3cecab9846" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "The policy details does not match. Please check the details provided for " ++ vars.policyID default ''
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="httpStatus" doc:id="ba89cc1b-2b33-40d3-b3fd-99bf4620d7dd" variableName="httpStatus"/>
+				<json-logger:logger doc:name="ClaimInsuranceLogger" doc:id="e01a7317-a440-48e2-831f-33eb1273a4f1" config-ref="JSON_Log_Config" message='#["Policy Validation Failed"]'/>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="704e2fb4-2558-4693-a320-4dc78fb7466b" type="APP_SALESFORCE:UPDATE_FAILED">
+				<ee:transform doc:name="Transform Message" doc:id="6acd0f54-3edd-4f2b-bb50-25cc33703b09" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Your Policy " ++ vars.policyID default '' as String ++ "has not been approved. Please contact the support team"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="httpStatus" doc:id="0c6e5dd8-6ca7-420c-88fc-a8ba4da60dbc" variableName="httpStatus"/>
+				<json-logger:logger doc:name="ClaimInsuranceLogger" doc:id="27775276-7063-4017-8401-c3fcbe8cf7c5" config-ref="JSON_Log_Config" message='#["Salesforce Updation Failed during Insurance Claim"]'/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<flow name="healthApprovalFlow" doc:id="e8ed167e-22d0-4c4e-8895-b764e9367b1d" >
+		<sqs:receivemessages doc:name="Receive messages" doc:id="8bf13c81-e474-4573-baa0-e4ac6bd9a6e3" config-ref="Amazon_SQS_Configuration"/>
+		<ee:transform doc:name="String to JSON" doc:id="b0f49253-c573-4ba1-9d45-182fb1951bc7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+read(payload,"application/json") map ((item, index) -> item ++ "Claimed__c": "Yes")]]></ee:set-payload>
+			</ee:message>
+			<ee:variables />
+		</ee:transform>
+		<ee:transform doc:name="JSON object to Array" doc:id="b7ec530d-e163-474e-825a-a0f20a451167" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	"Id" : payload[0].Id,
+	"Type__c" : payload[0].Type__c,
+	"Claimed__c" : "Yes",
+	"CustomerID__c" : payload[0].CustomerID__c
+}]]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="policyID" ><![CDATA[payload[0].PolicyID__c default '' as String]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:upsert doc:name="Upsert" doc:id="af32dc6d-fc57-4bbe-ae9b-024a029d05a0" config-ref="Salesforce_Config" objectType="Insurance__c" externalIdFieldName="Id">
+			<error-mapping targetType="APP_SALESFORCE:UPDATE_FAILED" />
+		</salesforce:upsert>
+		<set-payload value="#[%dw 2.0
+output application/json
+---
+{&quot;message&quot; :  vars.policyID default '' as String ++ &quot; Policy has been approved&quot;}]" doc:name="health_Claimed" doc:id="a87897a6-9818-4d55-b9b9-ade49b40bde0" />
+		<json-logger:logger doc:name="Logger" doc:id="aeb1efef-9c27-4dc0-a99d-a5bf0e345bb4" config-ref="JSON_Log_Config" message='#["Health Insurance Approval completed"]'/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a001f71d-1549-4419-921f-cfd068400ae4" type="APP_SALESFORCE:UPDATE_FAILED">
+				<ee:transform doc:name="Transform Message" doc:id="46d3f941-9846-44b1-9def-4f7be25861d0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": vars.policyID default '' as String ++ "has not been approved. Please contact the support team"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="400" doc:name="httpStatus" doc:id="184b495d-1c69-4317-a5c6-7d712d98b59c" variableName="httpStatus"/>
+				<json-logger:logger doc:name="Logger" doc:id="88b29b8f-f592-4fb0-9e18-e4ae7232e166" config-ref="JSON_Log_Config" message='#["Health Insurance Approval Failed due to Salesforce"]'/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

@@ -1,0 +1,92 @@
+#%RAML 1.0
+title: Prc Insurance API
+
+description: This API is used to get the insurance details and add them in the salesforce database
+
+protocols: 
+  - HTTPS
+
+mediaType: 
+  - application/json
+
+traits:
+  errorResp: !include /Traits/errorResponsesTrait.raml
+  client-ID-Secret: !include /Traits/headerTrait.raml
+
+ 
+securitySchemes:
+  customSecurity: !include /SecuritySchemes/customSecurityScheme.raml
+
+types:
+  insurance: !include /DataTypes/InsuranceDataType.raml
+
+/getInsurance:
+  is: [errorResp, client-ID-Secret]
+  get:
+    queryParameters:
+      ins:
+        type: string
+        required: true
+      drinking:
+        type: string
+        required: true
+      smoking:
+        type: string
+        required: true
+      disease:
+        type: string
+        required: true
+      medications:
+        type: string
+        required: true
+      age:
+        type: string
+        required: true
+      income:
+        type: string
+        required: true
+      insuranceType:
+        type: string
+        required: true     
+    responses:
+      200:
+        body:
+          application/json:
+            type: insurance
+            examples:
+              Output: !include /Examples/InsuranceResponse.json
+
+/addInsurance:
+  is: [errorResp, client-ID-Secret]
+  post:
+    body:
+        application/json:
+          type: insurance
+          examples:
+            output: !include /Examples/InsuranceResponse.json
+    responses:
+      201:
+        body:
+          application/json:
+            example: "The policy number is created"
+
+/claimInsurance:
+  is: [errorResp, client-ID-Secret]
+  get:
+    queryParameters:
+      policyid:
+        type: string
+        required: true
+      customerid:
+        type: string
+        required: true
+      insurance:
+        type: string
+        required: true
+    responses:
+      200:
+        body:
+          application/json:
+            example: "The policy is approved: POL-0001"
+
+      

@@ -1,0 +1,27 @@
+%dw 2.0
+
+type auto_16a9c77a_c0d8_4be3_86aa_a97da7efd17a_Input_Payload = {
+  Status: String, 
+  Agency: String, 
+  Email: String, 
+  Term_Months: Number, 
+  Address: String, 
+  PolicyDate: String, 
+  SumAssured: Number, 
+  Premium: Number, 
+  CustomerID: String, 
+  "type": String, 
+  Mobile: String, 
+  Claimed: String, 
+  Name: String, 
+  MonthlyPremium_First_2_yrs: Number, 
+  MonthlyPremium_From_3rd_yrs: Number, 
+  AgentID: String, 
+  CustomerName: String, 
+  InsurerName: String, 
+  AgentName: String, 
+  InsurerID: String, 
+  PolicyID: String, 
+  _?: Any
+}
+

@@ -1,0 +1,22 @@
+{
+  "Term_Years": 1,
+  "CustomerID": "1024",
+  "SumAssured": 209887,
+  "Mobile": "7793765741",
+  "AgentID": "42624",
+  "InsurerID": "TATA",
+  "Type": "Term",
+  "CustomerName": "ZYeOSMSM",
+  "Address": "XXXXX",
+  "Name": "Corona Policy - TATA AIG",
+  "Agency": "XXX",
+  "InsurerName": "TATA AIG",
+  "AgentName": "QgnrmCMx",
+  "Premium": 15576,
+  "PolicyDate": "2022-06-02",
+  "MonthlyPremium_First_2_yrs": 15576,
+  "MonthlyPremium_From_3rd_yrs": 15576,
+  "Email": "oWqltQHs98@gmail.com",
+  "Status": "Active",
+  "Claimed": "No"
+}

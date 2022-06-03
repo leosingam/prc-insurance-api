@@ -1,0 +1,8 @@
+%dw 2.0
+
+type auto_1ee7be23_7273_49a4_9859_a32a5bdd5648_Output_Payload = Array<Insurance__c>
+type Insurance__c = {| PolicyID__c?: String {"typeId": "PolicyID__c"} |} {"label": "Insurance",
+"typeId": "Insurance__c"}
+
+
+
