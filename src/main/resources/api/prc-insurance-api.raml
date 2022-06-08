@@ -19,9 +19,12 @@ securitySchemes:
 
 types:
   insurance: !include /DataTypes/InsuranceDataType.raml
+  addInsurance: !include /DataTypes/addInsuranceDataType.raml
 
 /getInsurance:
   is: [errorResp, client-ID-Secret]
+  securedBy:
+  - customSecurity 
   get:
     queryParameters:
       ins:
@@ -58,12 +61,14 @@ types:
 
 /addInsurance:
   is: [errorResp, client-ID-Secret]
+  securedBy:
+  - customSecurity 
   post:
     body:
         application/json:
-          type: insurance
+          type: addInsurance
           examples:
-            output: !include /Examples/InsuranceResponse.json
+            output: !include /Examples/addInsuranceExample.json
     responses:
       201:
         body:
@@ -72,6 +77,8 @@ types:
 
 /claimInsurance:
   is: [errorResp, client-ID-Secret]
+  securedBy:
+  - customSecurity
   get:
     queryParameters:
       policyid:
