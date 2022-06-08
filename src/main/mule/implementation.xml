@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mu
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
 http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
 http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd">
-	<flow name="getInsuranceFlow" doc:id="17c6d27a-4577-4b21-a1bb-ccf096ff2dd7" >
+	<flow name="getPolicyFlow" doc:id="17c6d27a-4577-4b21-a1bb-ccf096ff2dd7" >
 		<ee:transform doc:name="vars_insurerID &amp; TypeofInsurance" doc:id="2b28a23c-0b96-44fa-9084-8d7e4ba5be18" >
 			<ee:message >
 			</ee:message>
@@ -58,6 +58,7 @@ output application/json
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 import first from dw::core::Strings
+
 
 import * from dw::Runtime
 var lowercase_char="abcdefghijklmnopqrstuvwxyz"
@@ -114,7 +115,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 		</ee:transform>
 			</otherwise>
 		</choice>
-		<json-logger:logger doc:id="aa35e959-6084-4acb-8581-68a085c391ab" message='#["End of Get Insurance Flow"]' config-ref="JSON_Log_Config" doc:name="getInsuranceLogger"/>
+		<json-logger:logger doc:id="aa35e959-6084-4acb-8581-68a085c391ab" message='#["End of Get Insurance Flow"]' config-ref="JSON_Log_Config" doc:name="getPolicyLogger"/>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f07297bf-5bca-469d-9ea8-e11509b95334" type="APP:GET_INSURANCE_REQUEST_CONNECTIVITY">
 				<ee:transform doc:name="Transform Message" doc:id="af9dd472-f844-4d4b-8be8-39852785ef8d" >

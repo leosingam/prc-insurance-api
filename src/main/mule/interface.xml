@@ -123,8 +123,8 @@ output application/json
     <flow name="get:\claimInsurance:prc-insurance-api-config">
         <flow-ref doc:name="Flow Reference" doc:id="7ad94315-21d3-4169-b1ef-457700fd7e2d" name="claimInsuranceFlow"/>
     </flow>
-    <flow name="get:\getInsurance:prc-insurance-api-config">
-        <flow-ref doc:name="getInsuranceFlowReference" doc:id="bed53308-d8cf-4afc-a91b-5ed75e6b5956" name="getInsuranceFlow"/>
+    <flow name="get:\getPolicy:prc-insurance-api-config">
+        <flow-ref doc:name="getPolicyFlowReference" doc:id="bed53308-d8cf-4afc-a91b-5ed75e6b5956" name="getPolicyFlow"/>
     </flow>
     <flow name="post:\addInsurance:application\json:prc-insurance-api-config">
 		<flow-ref doc:name="addInsuranceFlowReference" doc:id="d6923d74-a8c3-4d6a-a170-7d1cecc49d51" name="addInsuranceFlow"/>
