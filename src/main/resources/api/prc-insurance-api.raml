@@ -21,7 +21,7 @@ types:
   insurance: !include /DataTypes/InsuranceDataType.raml
   addInsurance: !include /DataTypes/addInsuranceDataType.raml
 
-/getInsurance:
+/getPolicy:
   is: [errorResp, client-ID-Secret]
   securedBy:
   - customSecurity 
