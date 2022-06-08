@@ -68,7 +68,7 @@ types:
       201:
         body:
           application/json:
-            example: "The policy number is created"
+            example: "Your policy has been added to the Salesforce Database. Your Policy ID is ::: POL-00001"
 
 /claimInsurance:
   is: [errorResp, client-ID-Secret]
@@ -87,6 +87,4 @@ types:
       200:
         body:
           application/json:
-            example: "The policy is approved: POL-0001"
-
-      
+            example: "POL-0001 Policy has been approved"

@@ -47,11 +47,11 @@ json:
     application:
       name: "Insurance Application"
       version: "1.0.0"
-      env: "qa"
+      env: "Sandbox"
 
 sfdc:
   username: "ravikumar.j.jayaraj@apisero.com"
-  password: "Jarvis1@"
+  password: "Jarvis2@"
   token:  "CsifJkkEnMYNoglZteti0SEI7"
   
   
