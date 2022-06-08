@@ -56,8 +56,8 @@ sfdc:
   
   
 sqs:
-  accessKey: "AKIA53A6BH2GS5TG6DMA"
-  secretKey: "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"
+  accessKey: "AKIA53A6BH2G25HKQLXQ"
+  secretKey: "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"
   arn: "arn:aws:sqs:us-east-2:951398252173:health_approval_request"
   url: "https://sqs.us-east-2.amazonaws.com/951398252173/health_approval_request"
   region: "US East (Ohio)"

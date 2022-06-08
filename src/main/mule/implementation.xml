@@ -438,7 +438,7 @@ output application/json
 		<set-payload value="#[%dw 2.0
 output application/json
 ---
-{&quot;message&quot; :  vars.policyID default '' as String ++ &quot; Policy has been approved&quot;}]" doc:name="health_Claimed" doc:id="a87897a6-9818-4d55-b9b9-ade49b40bde0" />
+{&quot;message&quot; :  vars.policyID default '' as String ++ &quot; Policy has been approved&quot;}]" doc:name="health_Claim" doc:id="a87897a6-9818-4d55-b9b9-ade49b40bde0" />
 		<json-logger:logger doc:name="Logger" doc:id="aeb1efef-9c27-4dc0-a99d-a5bf0e345bb4" config-ref="JSON_Log_Config" message='#["Health Insurance Approval completed"]'/>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a001f71d-1549-4419-921f-cfd068400ae4" type="APP_SALESFORCE:UPDATE_FAILED">
